@@ -37,7 +37,7 @@ npm install -D tailwindcss postcss autoprefixer
 npx tailwindcss init -p
 ```
 
-Go to tailwind.config.js and add:
+- Go to tailwind.config.js and add:
 
 ```bash
   content: [
@@ -45,7 +45,7 @@ Go to tailwind.config.js and add:
   ],
 ```
 
-Go to index.css and add:
+- Go to index.css and add:
 
 ```bash
 @tailwind base;
@@ -216,15 +216,15 @@ server
 
 ### React Toast Notification
 
-(1) Login User Not Found:
+> (1) Login User Not Found:
 
 ![Login User Not Found](./img/login_user_not_found.png)
 
-(2) Sign Up User is Missing:
+> (2) Sign Up User is Missing:
 
 ![Login User Not Found](./img/sign_up_user_is_missing.png)
 
-(3) Log Out Successful:
+> (3) Log Out Successful:
 
 ![Log Out Successful](./img/logout_successful.png)
 
@@ -252,6 +252,6 @@ server
 
 - https://www.youtube.com/watch?v=J4WSmVX6Lhg
 
-## Note
+## Notes
 
 This repository is for learning purposes only.
