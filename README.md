@@ -174,7 +174,7 @@ server
 
 1. Assign the current user a JSON web token only when _logged in_.
 
-- If the passwords match, we sign the token with the user email, name, and _id and a pre-defined JWT secret.
+- If the passwords match, we sign the token with the user email, name, and _id, and a pre-defined JWT secret.
 
 - Set the signed token to cookies and send them back to the frontend.
 
@@ -196,7 +196,7 @@ server
 
 - However, since we use useEffect to fetch the user information from the backend, which is an asynchronous function and takes about 20 milliseconds, the website will be redirected to the login page due to this delay.
 
-- To overcome this delay and keep us on the current page if we are already logged in, we need to define another state “ready” in the context, and set “ready” to true after we set user information. Then in the page, if “ready” is true and user information is null, then we can redirect the page to the login page.
+- To overcome this delay and keep us on the current page if we are already logged in, we need to define another state "ready" in the context and set "ready" to true after we set user information. Then in the page, if "ready" is true and user information is null, then we can redirect the page to the login page.
 
 5. Logout:
 
