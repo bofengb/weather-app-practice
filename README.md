@@ -127,13 +127,13 @@ npm i bcrypt
 
 7. Install jsonwebtoken for JSON web token (JWT):
 
-- Implement cookies to a specific user and track them throughout the site:
+- Implement cookies to a specific user and track them throughout the application:
 
 ```bash
 npm i jsonwebtoken
 ```
 
-- Initialize cookie parser: allow the cookies to go back from one host to another:
+- Initialize cookie parser allowing the cookies to go back from one host to another:
 
 ```bash
 npm i cookie-parser
@@ -150,6 +150,7 @@ client
 │   ├── App.jsx
 │   └── main.jsx
 ├── index.html
+├── .env
 └── configuration(s)
 ```
 
@@ -170,41 +171,41 @@ server
 
 ## Functionality
 
-### Use JWT to protect APIs
+### Use JWT to Protect APIs
 
-1. Assign the current user a JSON web token only when _logged in_.
+1. Assign the current user a JSON web token only when ___logged in___:
 
-- If the passwords match, we sign the token with the user email, name, and _id, and a pre-defined JWT secret.
+> - If the passwords match, we sign the token with the user email, name, and _id, and a pre-defined JWT secret.
 
-- Set the signed token to cookies and send them back to the frontend.
+> - Set the signed token to cookies and send them back to the frontend.
 
-2. Share cookies through the application:
+2. Share cookies throughout the application:
 
-- Access cookies throughout the whole application using _useContext_ in React. We can have user information on any page the user goes to if they are logged in.
+> - Access cookies throughout the whole application using _useContext_ in React. We can have user information on any page the users go to if they are logged in.
 
 3. Authentication control:
 
-- Require the client to have the token in the header of each request.
+> - Require the client to have the token in the header of each request.
 
-- If there is a token in the cookie, we first verify the token with a JWT secret. Then we can get user information.
+> - If there is a token in the cookie, we first verify the token with a JWT secret. Then we can obtain user information.
 
-- If there is no token in the cookie, we return null.
+> - If there is no token in the cookie, we redirect users to the login page.
 
-4. Jump to the login page if not already logged in.
+4. Jump to the login page if not already logged in:
 
-- We check user information from context. If user information is null, then we navigate to the login page.
+> - We check user information from the context. If user information is null, then we navigate users to the login page.
 
-- However, since we use useEffect to fetch the user information from the backend, which is an asynchronous function and takes about 20 milliseconds, the website will be redirected to the login page due to this delay.
+> - However, since we use _useEffect_ to fetch the user information from the backend, which is an asynchronous function and takes about 20 milliseconds, the website will be redirected to the login page due to this delay.
 
-- To overcome this delay and keep us on the current page if we are already logged in, we need to define another state "ready" in the context and set "ready" to true after we set user information. Then in the page, if "ready" is true and user information is null, then we can redirect the page to the login page.
+> - To overcome this delay and keep users on the current page if they are already logged in, we need to define another state "ready" in the context and set "ready" to true after we set user information. Then on each page, if "ready" is true and user information is null, then we can redirect the page to the login page.
 
 5. Logout:
 
-- Reset cookies to an empty string.
+> - Reset cookies to an empty string.
 
-- Navigate back to the login page.
+> - Navigate back to the login page.
 
-### Client-side password toggling for better user experience.
+### Frontend Password Toggling for Better User Experience
 
 ## Demo
 
@@ -234,7 +235,7 @@ server
 
 ![Main Page](./img/search_city.png)
 
-### Look up Weather
+### Check the Weather
 
 ![Weather](./img/weather.png)
 
