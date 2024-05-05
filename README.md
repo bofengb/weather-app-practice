@@ -1,18 +1,18 @@
 # Weather Application Practice
 
-### Description
+## Description
 
 This project is a weather application that is built based on the tutorials listed in the reference section. Users can sign up or log in to check weather conditions around the world. The techniques used in the project are _the MERN stack (MongoDB, Express, React, and Node. js)_.
 
-### Prerequisites
+## Prerequisites
 
 - Node.js
 - Yarn
 - npm
 
-### Dependency
+## Dependency
 
-#### Frontend Dependency
+### Frontend Dependency
 
 (1) Create React App:
 ```bash
@@ -83,7 +83,7 @@ npm i lodash
 yarn add react-hot-toast
 ```
 
-#### Backend Dependency
+### Backend Dependency
 
 (1) Install ExpressJS:
 
@@ -139,7 +139,7 @@ npm i jsonwebtoken
 npm i cookie-parser
 ```
 
-### Project Directory
+## Project Directory
 
 ```
 client
@@ -166,9 +166,9 @@ server
 └── configuration(s)
 ```
 
-### Functionality
+## Functionality
 
-#### Use JWT to protect APIs
+### Use JWT to protect APIs
 
 (1) Assign the current user a JSON web token only when _logged in_.
 
@@ -202,19 +202,19 @@ server
 
 - Navigate back to the login page.
 
-#### Client-side password toggling for better user experience.
+### Client-side password toggling for better user experience.
 
-### Demo
+## Demo
 
-#### Sign Up Page (with password toggling)
+### Sign Up Page (with password toggling)
 
 ![Sign Up Page](./img/signup.png)
 
-<!-- #### Login Page
+<!-- ### Login Page
 
 ![Login Page](./img/login.png) -->
 
-#### React Toast Notification
+### React Toast Notification
 
 (1) Login User Not Found:
 
@@ -228,21 +228,21 @@ server
 
 ![Log Out Successful](./img/logout_successful.png)
 
-#### Search for Cities
+### Search for Cities
 
 ![Main Page](./img/search_city.png)
 
-#### Look up Weather
+### Look up Weather
 
 ![Weather](./img/weather.png)
 
-### Resources
+## Resources
 
 - Icons: https://heroicons.com/
 
 - OpenWeather: https://openweathermap.org/api
 
-### References
+## References
 
 - https://www.youtube.com/watch?v=XPC81RWOItI
 
@@ -252,6 +252,6 @@ server
 
 - https://www.youtube.com/watch?v=J4WSmVX6Lhg
 
-### Note
+## Note
 
 This repository is for learning purposes only.
