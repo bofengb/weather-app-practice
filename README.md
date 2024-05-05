@@ -195,9 +195,9 @@ server
 
 > - We check user information from the context. If user information is null, then we navigate users to the login page.
 
-> - However, since we use _useEffect_ to fetch the user information from the backend, which is an asynchronous function and takes about 20 milliseconds, the website will be redirected to the login page due to this delay.
+> - However, since we use _useEffect_ to fetch the user information from the backend, which is an asynchronous function and takes about 20 milliseconds, the website will always be redirected to the login page due to this delay.
 
-> - To overcome this delay and keep users on the current page if they are already logged in, we need to define another state "ready" in the context and set "ready" to true after we set user information. Then on each page, if "ready" is true and user information is null, then we can redirect the page to the login page.
+> - To overcome this delay and keep users on the current page if they are already logged in, we need to define another state "ready" in the context and set "ready" to true after we set user information. Then on each page, if "ready" is true and user information is null, then we can redirect the users to the login page.
 
 5. Logout:
 
@@ -219,15 +219,15 @@ server
 
 ### React Toast Notification
 
-> (1) Login User Not Found:
+> (1) Login user not found:
 
 ![Login User Not Found](./img/login_user_not_found.png)
 
-> (2) Sign Up User is Missing:
+> (2) Sign up user is missing:
 
 ![Login User Not Found](./img/sign_up_user_is_missing.png)
 
-> (3) Log Out Successful:
+> (3) Log out successful:
 
 ![Log Out Successful](./img/logout_successful.png)
 
