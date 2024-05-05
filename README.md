@@ -14,7 +14,7 @@ This project is a weather application that is built based on the tutorials liste
 
 ### Frontend Dependency
 
-(1) Create React App:
+1. Create React App:
 ```bash
 yarn create vite
 ```
@@ -27,7 +27,7 @@ cd client
 yarn install
 ```
 
-(2) Install Tailwind CSS (https://tailwindcss.com/docs/guides/vite):
+2. Install Tailwind CSS (https://tailwindcss.com/docs/guides/vite):
 
 ```bash
 npm install -D tailwindcss postcss autoprefixer
@@ -53,31 +53,31 @@ npx tailwindcss init -p
 @tailwind utilities;
 ```
 
-(3) Install Axios:
+3. Install Axios:
 
 ```bash
 npm i axios
 ```
 
-(4) Install react-router DOM:
+4. Install react-router DOM:
 
 ```bash
 npm i react-router-dom
 ```
 
-(5) Install react icons for common icons:
+5. Install react icons for common icons:
 
 ```bash
 npm i react-icons
 ```
 
-(6) Install Lodash utility library:
+6. Install Lodash utility library:
 
 ```bash
 npm i lodash
 ```
 
-(7) Install react hot toast for interface notification:
+7. Install react hot toast for interface notification:
 
 ```bash
 yarn add react-hot-toast
@@ -85,31 +85,31 @@ yarn add react-hot-toast
 
 ### Backend Dependency
 
-(1) Install ExpressJS:
+1. Install ExpressJS:
 
 ```bash
 npm i express
 ```
 
-(2) Install dotenv for env configuration:
+2. Install dotenv for env configuration:
 
 ```bash
 npm i dotenv
 ```
 
-(3) Install CORS on the server to connect two different hosts:
+3. Install CORS on the server to connect two different hosts:
 
 ```bash
 npm i cors
 ```
 
-(4) Install mongoose to connect to MongoDB:
+4. Install mongoose to connect to MongoDB:
 
 ```bash
 npm i mongoose
 ```
 
-(5) Install nodeman to monitor the changes made on the server:
+5. Install nodeman to monitor the changes made on the server:
 
 ```bash
 yarn global add nodemon
@@ -119,13 +119,13 @@ yarn global add nodemon
 nodemon index.js
 ```
 
-(6) Install bcrypt to encrypt the password (hashed password) and compare passwords during login:
+6. Install bcrypt to encrypt the password (hashed password) and compare passwords during login:
 
 ```bash
 npm i bcrypt
 ```
 
-(7) Install jsonwebtoken for JSON web token (JWT):
+7. Install jsonwebtoken for JSON web token (JWT):
 
 - Implement cookies to a specific user and track them throughout the site:
 
@@ -153,6 +153,8 @@ client
 └── configuration(s)
 ```
 
+---
+
 ```
 server
 ├── controllers
@@ -170,17 +172,17 @@ server
 
 ### Use JWT to protect APIs
 
-(1) Assign the current user a JSON web token only when _logged in_.
+1. Assign the current user a JSON web token only when _logged in_.
 
 - If the passwords match, we sign the token with the user email, name, and _id and a pre-defined JWT secret.
 
 - Set the signed token to cookies and send them back to the frontend.
 
-(2) Share cookies through the application:
+2. Share cookies through the application:
 
 - Access cookies throughout the whole application using _useContext_ in React. We can have user information on any page the user goes to if they are logged in.
 
-(3) Authentication control:
+3. Authentication control:
 
 - Require the client to have the token in the header of each request.
 
@@ -188,7 +190,7 @@ server
 
 - If there is no token in the cookie, we return null.
 
-(4) Jump to the login page if not already logged in.
+4. Jump to the login page if not already logged in.
 
 - We check user information from context. If user information is null, then we navigate to the login page.
 
@@ -196,7 +198,7 @@ server
 
 - To overcome this delay and keep us on the current page if we are already logged in, we need to define another state “ready” in the context, and set “ready” to true after we set user information. Then in the page, if “ready” is true and user information is null, then we can redirect the page to the login page.
 
-(5) Logout:
+5. Logout:
 
 - Reset cookies to an empty string.
 
