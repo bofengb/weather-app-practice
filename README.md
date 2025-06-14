@@ -175,7 +175,7 @@ server
 
 1. Assign the current user a JSON web token only when ___logged in___:
 
-> - If the passwords match, we sign the token with the user email, name, and _id, and a pre-defined JWT secret.
+> - If the passwords match, we sign the token with the user email, name, id, and a pre-defined JWT secret.
 
 > - Set the signed token to cookies and send them back to the frontend.
 
