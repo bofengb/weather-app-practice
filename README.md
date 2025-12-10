@@ -5,6 +5,7 @@ A full-stack weather application built with the MERN stack (MongoDB, Express, Re
 ## Features
 
 - **Authentication**: Register/login with JWT stored in httpOnly cookies
+- **User Settings**: Profile editing (username) and password change via modal dialog
 - **Weather Search**: City autocomplete with debounced search, current weather display
 - **Favorites**: Save up to 10 favorite cities with quick access
 - **Search History**: Paginated, sortable history of past searches
@@ -54,7 +55,7 @@ A full-stack weather application built with the MERN stack (MongoDB, Express, Re
     auth.ts                   # JWT verification middleware
     errorHandler.ts           # Centralized error handling
   /controllers
-    authController.ts         # register, login, logout, profile
+    authController.ts         # register, login, logout, profile, updateProfile, changePassword
     weatherController.ts      # history CRUD, favorites CRUD, statistics
     mapController.ts          # combined map data endpoint
   /models
@@ -86,14 +87,16 @@ A full-stack weather application built with the MERN stack (MongoDB, Express, Re
     Favorites.tsx             # Favorites grid with live weather
     Map.tsx                   # Interactive Leaflet map
   /components
-    Header.tsx                # Navigation + user info + logout
+    Header.tsx                # Navigation + avatar + logout
+    Avatar.tsx                # Deterministic color avatar from username
+    SettingsDialog.tsx        # Profile/password settings modal (tabbed)
     ProtectedRoute.tsx        # Auth guard with loading state
-    /ui                       # shadcn components
+    /ui                       # shadcn components (includes Dialog)
     /map                      # Map components (WeatherMap, MarkerPopup, MapControls, MapLegend)
   /lib
     utils.ts                  # cn() for Tailwind class merging
     weather.ts                # WMO weather codes to descriptions/icons
-    validations.ts            # Zod schemas for forms
+    validations.ts            # Zod schemas for forms (login, register, profile, password)
 ```
 
 ## API Endpoints
@@ -107,6 +110,8 @@ Rate limited: 100 requests per 15 minutes
 | POST | `/login` | `{email, password}` | Login, returns JWT cookie |
 | POST | `/logout` | - | Clear JWT cookie |
 | GET | `/profile` | - | Get current user from token |
+| PATCH | `/profile` | `{username}` | Update username (auth required) |
+| PATCH | `/password` | `{currentPassword, newPassword}` | Change password (auth required) |
 
 ### Protected Routes (require authentication)
 

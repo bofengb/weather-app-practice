@@ -5,6 +5,8 @@ import User from '../models/User.js';
 import type {
   RegisterRequest,
   LoginRequest,
+  UpdateProfileRequest,
+  ChangePasswordRequest,
   JWTPayload,
 } from '../types/index.js';
 
@@ -125,4 +127,83 @@ export const logoutUser = async (
   res
     .cookie('token', '', { ...cookieOptions, maxAge: 0 })
     .json({ success: true });
+};
+
+export const updateProfile = async (
+  req: Request<{}, {}, UpdateProfileRequest>,
+  res: Response
+): Promise<void> => {
+  const { username } = req.body;
+  const userId = req.user!.id;
+
+  try {
+    if (!username || username.length < 2) {
+      res
+        .status(400)
+        .json({ error: 'Username must be at least 2 characters.' });
+      return;
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { username },
+      { new: true }
+    );
+
+    if (!user) {
+      res.status(404).json({ error: 'User not found.' });
+      return;
+    }
+
+    // issue new JWT with updated username
+    const token = jwt.sign(
+      { email: user.email, id: user._id.toString(), username: user.username },
+      process.env.JWT_SECRET!,
+      { expiresIn: '7d' }
+    );
+
+    const { password: _, ...userWithoutPassword } = user.toObject();
+    res.cookie('token', token, cookieOptions).json(userWithoutPassword);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+};
+
+export const changePassword = async (
+  req: Request<{}, {}, ChangePasswordRequest>,
+  res: Response
+): Promise<void> => {
+  const { currentPassword, newPassword } = req.body;
+  const userId = req.user!.id;
+
+  try {
+    if (!newPassword || newPassword.length < 6) {
+      res
+        .status(400)
+        .json({ error: 'New password must be at least 6 characters.' });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ error: 'User not found.' });
+      return;
+    }
+
+    const passwordMatch = await comparePasswords(
+      currentPassword,
+      user.password
+    );
+    if (!passwordMatch) {
+      res.status(400).json({ error: 'Current password is incorrect.' });
+      return;
+    }
+
+    user.password = await hashPassword(newPassword);
+    await user.save();
+
+    res.json({ message: 'Password updated successfully.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to change password' });
+  }
 };

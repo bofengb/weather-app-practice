@@ -1,18 +1,12 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { UserContext } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
-import {
-  Cloud,
-  History,
-  Star,
-  LogOut,
-  User,
-  Map,
-  LucideIcon,
-} from 'lucide-react';
+import Avatar from '@/components/Avatar';
+import SettingsDialog from '@/components/SettingsDialog';
+import { Cloud, History, Star, LogOut, Map, LucideIcon } from 'lucide-react';
 
 interface NavItem {
   path: string;
@@ -31,6 +25,7 @@ export default function Header() {
   const context = useContext(UserContext);
   const location = useLocation();
   const navigate = useNavigate();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   if (!context) {
     throw new Error('Header must be used within UserContextProvider');
@@ -85,23 +80,28 @@ export default function Header() {
 
         {/* User section */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden lg:flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5">
-            <User className="h-4 w-4 text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="rounded-full transition-transform hover:scale-110 hover:ring-2 hover:ring-primary/50 z-2000"
+          >
+            <Avatar name={user?.username || 'U'} size="sm" />
+            {/* <span className="hidden lg:block text-sm font-medium text-gray-700">
               {user?.username}
-            </span>
-          </div>
+            </span> */}
+          </button>
           <Button
             variant="outline"
             size="sm"
             onClick={logout}
             className="text-gray-600 hover:text-gray-900"
           >
-            <LogOut className="h-4 w-4 sm:mr-2" />
+            <LogOut className="h-4 w-4 lg:mr-2" />
             <span className="hidden lg:inline">Logout</span>
           </Button>
         </div>
       </div>
+
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </header>
   );
 }

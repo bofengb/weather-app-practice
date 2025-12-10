@@ -67,6 +67,15 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface UpdateProfileRequest {
+  username: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface SaveSearchRequest {
   cityName: string;
   country?: string;
