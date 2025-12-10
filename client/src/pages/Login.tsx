@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
@@ -27,7 +27,14 @@ export default function Login() {
     throw new Error('Login must be used within UserContextProvider');
   }
 
-  const { setUser } = context;
+  const { user, setUser, ready } = context;
+
+  // redirect if already logged in
+  useEffect(() => {
+    if (ready && user) {
+      navigate('/weather');
+    }
+  }, [ready, user, navigate]);
 
   // React Hook Form with Zod validation
   const {
