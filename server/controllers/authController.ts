@@ -21,10 +21,12 @@ const comparePasswords = (
   return bcrypt.compare(password, hashedPassword);
 };
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const cookieOptions = {
   httpOnly: true, // JS can't access (XSS protection)
-  secure: false, // HTTPS only
-  sameSite: 'lax' as const, // Blocks cross-site POST (CSRF protection)
+  secure: isProduction, // HTTPS only in prod
+  sameSite: 'lax' as const, // CSRF protection, works with same-origin proxy
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
