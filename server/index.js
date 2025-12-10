@@ -1,38 +1,64 @@
-const express = require("express");
-const cors = require("cors");
-const dotven = require("dotenv").config();
-const mongoose = require("mongoose");
-const cookieParser = require("cookie-parser");
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const errorHandler = require('./middleware/errorHandler');
 
-// Initialize express
 const app = express();
 
-// Enable JSON in ExpressJS
-app.use(express.json());
+// Middleware order matters
+// helmet first for security headers (CSP, X-Frame-Options, etc.)
+app.use(helmet());
 
-// Initialize CORS
+// Only rate-limiting auth routes. They're the brute-force target.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: 'Too many requests, please try again later.' },
+});
+
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser()); // Parses cookies into req.cookies
 app.use(
   cors({
-    credentials: true,
-    // origin: "http://localhost:5173",
+    credentials: true, // Allow cookies to be sent cross-origin
     origin: process.env.CORS_ORIGIN_URL,
   })
 );
 
-// Initialize cookie parser: allow the cookies to be going back from one host to another
-app.use(cookieParser());
-app.use(express.urlencoded({ extended: false }));
-
-// Connect to MongoDB
 mongoose
   .connect(process.env.MONGODB_URL)
-  .then(() => console.log("DB connected"))
-  .catch((error) => console.log(error));
-// console.log(process.env.MONGODB_URL);
+  .then(() => console.log('DB connected'))
+  .catch((error) => {
+    console.error('MongoDB connection failed:', error.message);
+    process.exit(1);
+  });
 
-// All routes go to auth routes
-app.use("/", require("./routes/authRoutes"));
+// Health check
+app.get('/api/v1/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+  });
+});
 
-// Define listener
-const port = 4000;
+// Routes
+// AuthLimiter only on auth
+// Protected routes are handled by JWT
+app.use('/api/v1/auth', authLimiter, require('./routes/authRoutes'));
+app.use('/api/v1', require('./routes/weatherRoutes'));
+app.use('/api/v1/map', require('./routes/mapRoutes'));
+
+// Error handler 
+// (1) Must be last. (2) Must has 4-param signature to tell Express it handles errors
+app.use(errorHandler);
+
+const port = process.env.PORT || 4000;
 app.listen(port, () => console.log(`Server is running on port ${port}`));
+
+// Export for Vercel serverless
+module.exports = app;

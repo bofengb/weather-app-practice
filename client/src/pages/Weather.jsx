@@ -1,223 +1,306 @@
-import { useContext, useEffect, useState } from "react";
-import _ from "lodash";
-import { Link, useNavigate, Navigate } from "react-router-dom";
-import { UserContext } from "../context/UserContext";
-import axios from "axios";
-import { toast } from "react-hot-toast";
+import { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
+import Header from '@/components/Header';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import useFavorites from '@/hooks/useFavorites';
+import useSearchHistory from '@/hooks/useSearchHistory';
+import useDebounce from '@/hooks/useDebounce';
+import { getWeatherDescription, getWeatherIcon } from '@/lib/weather';
+import {
+  Star,
+  Wind,
+  Thermometer,
+  Droplets,
+  Map as MapIcon,
+} from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
-const Weather = () => {
-  const navigate = useNavigate();
-
+export default function Weather() {
+  const [searchQuery, setSearchQuery] = useState('');
   const [geoData, setGeoData] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
-  const [changeCity, setChangeCity] = useState(true);
+  const [showSearch, setShowSearch] = useState(true);
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { user, ready } = useContext(UserContext);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Two states: searchQuery (immediate) vs debouncedSearch (delayed 500ms)
+  // Avoids API call on every keystroke while feeling responsive
+  const debouncedSearch = useDebounce(searchQuery, 500);
+  const { saveSearch } = useSearchHistory();
+  const {
+    isFavorited,
+    getFavoriteId,
+    addFavorite,
+    removeFavorite,
+    canAddMore,
+  } = useFavorites();
 
-  const apiKey = "bd5e378503939ddaee76f12ad7a97608";
-
-  async function search(value) {
-    try {
-      const res = await fetch(
-        `http://api.openweathermap.org/geo/1.0/direct?q=${value}&limit=5&appid=${apiKey}`
-      );
-
-      const data = await res.json();
-      if (data.cod === "400") {
-        return null;
-      } else {
-        console.log(data);
-        return data;
-      }
-    } catch (error) {
-      console.log(error);
+  // Deep linking via URL params
+  const handleViewOnMap = () => {
+    if (currentLocation) {
+      navigate(`/map?lat=${currentLocation.lat}&lon=${currentLocation.lon}`);
     }
-  }
+  };
 
-  const handleSearchDebounce = _.debounce(async (value) => {
-    setGeoData(await search(value));
-  }, 700);
+  // Fetch city suggestions when debounced search changes
+  useEffect(() => {
+    if (!debouncedSearch.trim()) {
+      setGeoData(null);
+      return;
+    }
 
-  async function handleChange(e) {
-    handleSearchDebounce(e.target.value);
-  }
+    const fetchCities = async () => {
+      try {
+        const res = await fetch(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(debouncedSearch)}&count=5&language=en&format=json`
+        );
 
-  async function handleOnClick(lat, lon, name) {
-    console.log(lat, lon, name);
+        if (!res.ok) {
+          toast.error('Failed to search cities');
+          return;
+        }
 
-    const res = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
-    );
-    const data = await res.json();
-
-    const tempT = data.main.temp;
-    const feelsLikeT = data.main.feels_like;
-    const humidityT = data.main.humidity;
-    const windT = data.wind.speed;
-    const iconT = data.weather[0].icon;
-    const weatherDataT = {
-      temp: tempT,
-      feelsLike: feelsLikeT,
-      humidity: humidityT,
-      wind: windT,
-      icon: `https://openweathermap.org/img/wn/${iconT}@4x.png`,
-      name: name,
+        const data = await res.json();
+        setGeoData(data.results || null);
+      } catch (error) {
+        toast.error('Search failed');
+      }
     };
 
-    setWeatherData(weatherDataT);
-    setChangeCity(false);
-  }
+    fetchCities();
+  }, [debouncedSearch]);
 
+  // Handle incoming URL params (e.g., from Map's "View Details" link)
+  // Only runs once on mount
   useEffect(() => {
-    console.log(weatherData);
-  }, [weatherData]);
+    const lat = searchParams.get('lat');
+    const lon = searchParams.get('lon');
+    const name = searchParams.get('name');
+    const country = searchParams.get('country') || '';
 
-  function handleChangeCity(e) {
-    setChangeCity(!changeCity);
-  }
-
-  // Jump to login page if not already logged in
-  if (ready && !user) {
-    console.log(user);
-    // navigate('/login');
-    return <Navigate to={"/login"} />;
-  }
-
-  const logout = async () => {
-    const { data } = await axios.post("/logout");
-    if (data) {
-      toast.success("Logout Successful.");
+    if (lat && lon && name) {
+      handleCitySelect(parseFloat(lat), parseFloat(lon), name, country);
     }
-    navigate("/login");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleCitySelect = async (lat, lon, name, country = '') => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`
+      );
+
+      if (!res.ok) {
+        toast.error('Failed to fetch weather data');
+        return;
+      }
+
+      const data = await res.json();
+      const current = data.current;
+      const weatherCode = current.weather_code;
+
+      const weather = {
+        temp: current.temperature_2m,
+        feelsLike: current.apparent_temperature,
+        humidity: current.relative_humidity_2m,
+        wind: current.wind_speed_10m,
+        icon: getWeatherIcon(weatherCode),
+        condition: getWeatherDescription(weatherCode),
+        name,
+        country,
+        lat,
+        lon,
+      };
+
+      setWeatherData(weather);
+      setCurrentLocation({ lat, lon, name, country });
+      setShowSearch(false);
+      setSearchQuery('');
+      setGeoData(null);
+
+      try {
+        await saveSearch({
+          cityName: name,
+          country,
+          lat,
+          lon,
+          temperature: weather.temp,
+          feelsLike: weather.feelsLike,
+          humidity: weather.humidity,
+          windSpeed: weather.wind,
+          weatherCondition: weather.condition,
+          weatherIcon: String(weatherCode),
+        });
+      } catch (err) {
+        // Error
+      }
+    } catch (error) {
+      toast.error('Failed to fetch weather data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFavoriteToggle = async () => {
+    if (!currentLocation) return;
+
+    const { lat, lon, name, country } = currentLocation;
+    const favorited = isFavorited(lat, lon);
+
+    try {
+      if (favorited) {
+        const favoriteId = getFavoriteId(lat, lon);
+        await removeFavorite(favoriteId);
+        toast.success(`${name} removed from favorites`);
+      } else {
+        if (!canAddMore) {
+          toast.error('Maximum 10 favorites allowed');
+          return;
+        }
+        await addFavorite({ cityName: name, country, lat, lon });
+        toast.success(`${name} added to favorites`);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to update favorites');
+    }
   };
 
   return (
-    <div>
-      <header className="p-4 flex flex-row justify-end">
-        {/* <Link to={"/weather"} */}
-        <button
-          onClick={logout}
-          className="flex items-center gap-2 border border-gray-300 rounded-full py-2 px-4 mr-20 mt-10"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="w-6 h-6"
-          >
-            <path
-              fillRule="evenodd"
-              d="M3 6.75A.75.75 0 0 1 3.75 6h16.5a.75.75 0 0 1 0 1.5H3.75A.75.75 0 0 1 3 6.75ZM3 12a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75A.75.75 0 0 1 3 12Zm0 5.25a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 0 1.5H3.75a.75.75 0 0 1-.75-.75Z"
-              clipRule="evenodd"
-            />
-          </svg>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <Header />
 
-          <div className="bg-gray-500 text-white rounded-full border border-gray-500 overflow-hidden">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-6 h-6 relative top-1"
-            >
-              <path
-                fillRule="evenodd"
-                d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
-                clipRule="evenodd"
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-md mx-auto">
+          {showSearch ? (
+            <div className="space-y-4 pt-12">
+              <h1 className="text-2xl font-bold text-center mb-8">
+                Search Weather
+              </h1>
+              <Input
+                type="text"
+                placeholder="Search for a city..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="text-lg h-12"
               />
-            </svg>
-          </div>
-          {!!user && <div>{user?.username}</div>}
-        </button>
-      </header>
-      <div className="w-full min-h-80 text-sm flex flex-col items-center">
-        {changeCity && (
-          <form className="w-full max-w-80 text-center py-5 font-bold text-base mt-20 pt-20">
-            <input
-              className="border-b-4 border-gray-300 text-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-indigo-500 py-3 w-full bg-transparent"
-              type="text"
-              placeholder="Search city..."
-              onChange={handleChange}
-            ></input>
-            <ul className="text-left p-1 flex flex-col gap-1">
-              {geoData &&
-                geoData.map((dataRecord, index) => {
-                  return (
-                    <li
-                      className="bg-gray-100 cursor-pointer"
-                      key={index}
-                      data-lat={dataRecord.lat}
-                      data-lon={dataRecord.lon}
-                      data-name={dataRecord.name}
-                      onClick={() => {
-                        handleOnClick(
-                          dataRecord.lat,
-                          dataRecord.lon,
-                          dataRecord.name
-                        );
-                      }}
-                    >
-                      {dataRecord.name}
-                      <span className="text-gray-700">
-                        {dataRecord.country}
-                      </span>
-                    </li>
-                  );
-                })}
 
-              {/* <li className="bg-gray-100 cursor-pointer">
-                Test 1<span className="text-gray-700">UK</span>
-              </li>
-              <li className="bg-gray-100 cursor-pointer">Test 2</li>
-              <li className="bg-gray-100 cursor-pointer">Test 3</li>
-              <li className="bg-gray-100 cursor-pointer">Test 4</li>
-              <li className="bg-gray-100 cursor-pointer">Test 5</li> */}
-            </ul>
-          </form>
-        )}
+              {geoData && geoData.length > 0 && (
+                <Card>
+                  <CardContent className="p-2">
+                    {geoData.map((city, index) => (
+                      <button
+                        key={index}
+                        onClick={() =>
+                          handleCitySelect(
+                            city.latitude,
+                            city.longitude,
+                            city.name,
+                            city.country
+                          )
+                        }
+                        className="w-full text-left px-4 py-3 hover:bg-accent rounded-md transition-colors"
+                      >
+                        <span className="font-medium">{city.name}</span>
+                        <span className="text-muted-foreground ml-2">
+                          {city.country}
+                        </span>
+                      </button>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
 
-        {!changeCity && (
-          <div className="w-full max-w-80 text-center py-5 font-bold text-base flex flex-col items-center">
-            <img src={weatherData ? weatherData.icon : ""} alt="" />
-            <h1 className="text-6xl mb-6">
-              {weatherData ? weatherData.temp : ""}&#8451;
-            </h1>
-            <h2 className="text-3xl text-orange-500">
-              {weatherData ? weatherData.name : ""}
-            </h2>
-            <button
-              className="flex cursor-pointer w-30 justify-center rounded-3xl border border-transparent bg-blue-400 py-2 m-5 px-4 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-indigo-500"
-              onClick={handleChangeCity}
-            >
-              Change City
-            </button>
-            <div className="flex flex-row grid-cols-3 gap-20">
-              <div>
-                <h3 className="text-xl uppercase">Wind</h3>
-                <div className="text-3xl">
-                  {weatherData ? weatherData.wind : ""}
-                  <span className="text-gray-600 text-xs">km/h</span>
+              {isLoading && (
+                <div className="space-y-4 mt-8">
+                  <Skeleton className="h-32 w-32 mx-auto rounded-full" />
+                  <Skeleton className="h-8 w-24 mx-auto" />
+                  <Skeleton className="h-6 w-32 mx-auto" />
                 </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center space-y-6 pt-8">
+              <div className="text-8xl">{weatherData?.icon}</div>
+
+              <div>
+                <h1 className="text-6xl font-bold">
+                  {weatherData?.temp?.toFixed(1)}°C
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  {weatherData?.condition}
+                </p>
               </div>
-              <div>
-                <h3 className="text-xl uppercase text-nowrap">Feels Like</h3>
-                <div className="text-3xl">
-                  {weatherData ? weatherData.feelsLike : ""}
-                  <span className="text-gray-600 text-xs">&#8451;</span>
-                </div>
+
+              <div className="flex items-center justify-center gap-2">
+                <h2 className="text-2xl font-semibold text-primary">
+                  {weatherData?.name}
+                </h2>
+                <button
+                  onClick={handleFavoriteToggle}
+                  className="text-2xl hover:scale-110 transition-transform"
+                  title={
+                    currentLocation &&
+                    isFavorited(currentLocation.lat, currentLocation.lon)
+                      ? 'Remove from favorites'
+                      : 'Add to favorites'
+                  }
+                >
+                  {currentLocation &&
+                  isFavorited(currentLocation.lat, currentLocation.lon) ? (
+                    <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" />
+                  ) : (
+                    <Star className="h-6 w-6 text-muted-foreground" />
+                  )}
+                </button>
               </div>
-              <div>
-                <h3 className="text-xl uppercase">Humidity</h3>
-                <div className="text-3xl">
-                  {weatherData ? weatherData.humidity : ""}
-                  <span className="text-gray-600 text-xs">%</span>
-                </div>
+
+              <div className="flex gap-2 justify-center">
+                <Button variant="outline" onClick={() => setShowSearch(true)}>
+                  Change City
+                </Button>
+                <Button variant="outline" onClick={handleViewOnMap}>
+                  <MapIcon className="h-4 w-4 mr-2" />
+                  View on Map
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4 pt-8">
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <Wind className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-2xl font-bold">{weatherData?.wind}</p>
+                    <p className="text-xs text-muted-foreground">km/h</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <Thermometer className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-2xl font-bold">
+                      {weatherData?.feelsLike}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Feels like</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <Droplets className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-2xl font-bold">
+                      {weatherData?.humidity}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Humidity %</p>
+                  </CardContent>
+                </Card>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </main>
     </div>
   );
-};
-
-export default Weather;
+}

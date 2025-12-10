@@ -1,36 +1,16 @@
-const express = require("express");
-const cores = require("cors");
+const express = require('express');
 const {
-  testFunction,
-  resigterUser,
+  registerUser,
   loginUser,
   getUserProfile,
   logoutUser,
-} = require("../controllers/authController");
+} = require('../controllers/authController');
 
-// Initialize express router
 const router = express.Router();
 
-router.use(
-  cores({
-    credentials: true,
-    origin: process.env.CORS_ORIGIN_URL,
-  })
-);
-
-// Test route
-router.get("/", testFunction);
-
-// Registration route
-router.post("/register", resigterUser);
-
-// Login route
-router.post("/login", loginUser);
-
-// Get profile
-router.get("/profile", getUserProfile);
-
-// Logout route
-router.post("/logout", logoutUser);
+router.post('/register', registerUser);
+router.post('/login', loginUser);
+router.get('/profile', getUserProfile);
+router.post('/logout', logoutUser);
 
 module.exports = router;
