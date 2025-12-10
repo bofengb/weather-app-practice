@@ -2,6 +2,8 @@
 
 A full-stack weather application built with the MERN stack (MongoDB, Express, React, Node.js) using **TypeScript**. Users can search for weather conditions worldwide, save favorites, view search history, and visualize locations on an interactive map.
 
+**Live Demo**: [weather-app-practice-urpb.vercel.app](https://weather-app-practice-urpb.vercel.app)
+
 ## Features
 
 - **Authentication**: Register/login with JWT stored in httpOnly cookies
