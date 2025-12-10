@@ -6,9 +6,9 @@ interface MongooseError extends Error {
 
 const errorHandler = (
   err: MongooseError,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   console.error(err.stack);
 

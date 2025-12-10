@@ -244,6 +244,17 @@ interface ISearchHistory {
 - CORS restricted to frontend origin
 - Request body size limited to 10kb
 
+## CI/CD
+
+GitHub Actions workflows run on push/PR to `client/` or `server/` directories:
+
+| Workflow | Triggers | Steps |
+|----------|----------|-------|
+| Client CI | `client/**` changes | Install → Lint → Format check → Build |
+| Server CI | `server/**` changes | Install → Lint → Format check → Build |
+
+Both use Node.js 20 on `ubuntu-latest`.
+
 ## Custom Hooks
 
 ### useFavorites
