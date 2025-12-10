@@ -1,260 +1,312 @@
-# Weather Application Practice
+# Weather App
 
-## Description
+A full-stack weather application built with the MERN stack (MongoDB, Express, React, Node.js) using **TypeScript**. Users can search for weather conditions worldwide, save favorites, view search history, and visualize locations on an interactive map.
 
-This project is a weather application that is built based on the tutorials listed in the reference section. Users can sign up or log in to check weather conditions around the world. The techniques used in the project are _the MERN stack (MongoDB, Express, React, and Node. js)_.
+## Features
 
-## Prerequisites
+- **Authentication**: Register/login with JWT stored in httpOnly cookies
+- **User Settings**: Profile editing (username) and password change via modal dialog
+- **Weather Search**: City autocomplete with debounced search, current weather display
+- **Favorites**: Save up to 10 favorite cities with quick access
+- **Search History**: Paginated, sortable history of past searches
+- **Interactive Map**: Leaflet-based map showing favorites and search history markers
 
-- Node.js
-- Yarn
-- npm
+## Tech Stack
 
-## Dependency
+### Frontend
+- TypeScript with strict mode
+- React 18 with Vite
+- React Router 6 for navigation
+- Tailwind CSS for styling
+- shadcn/ui components (Button, Card, Input, Label, Skeleton)
+- React Hook Form + Zod for form validation
+- Leaflet + React-Leaflet for maps
+- Axios for API requests
+- React Hot Toast for notifications
+- Lucide React for icons
 
-### Frontend Dependency
+### Backend
+- TypeScript with strict mode (ES2020 target)
+- Express.js with tsx (dev runner)
+- MongoDB with Mongoose ODM
+- JWT for authentication
+- bcrypt for password hashing
+- Helmet for security headers
+- express-rate-limit for rate limiting
+- cookie-parser for cookie handling
 
-1. Create React App:
-```bash
-yarn create vite
+### External APIs
+- [Open-Meteo Geocoding API](https://open-meteo.com/en/docs/geocoding-api) - City search
+- [Open-Meteo Weather API](https://open-meteo.com/en/docs) - Weather data (no API key required)
+
+### Code Formatting
+- Prettier configured in both `/client` and `/server`
+- Settings: single quotes, semicolons, 2-space tabs, trailing commas (ES5), 80 char line width
+
+## Project Structure
+
+```
+/server
+  index.ts                    # Express app setup, middleware, routes
+  /types
+    index.ts                  # Shared types: IUser, ISearchHistory, API types
+    express.d.ts              # Express Request augmentation for req.user
+  /middleware
+    auth.ts                   # JWT verification middleware
+    errorHandler.ts           # Centralized error handling
+  /controllers
+    authController.ts         # register, login, logout, profile, updateProfile, changePassword
+    weatherController.ts      # history CRUD, favorites CRUD, statistics
+    mapController.ts          # combined map data endpoint
+  /models
+    User.ts                   # User schema with embedded favorites
+    SearchHistory.ts          # Search history schema
+  /routes
+    authRoutes.ts             # /api/v1/auth/*
+    weatherRoutes.ts          # /api/v1/history, /api/v1/favorites, /api/v1/statistics
+    mapRoutes.ts              # /api/v1/map/data
+
+/client/src
+  App.tsx                     # Routes, axios config, context provider
+  main.tsx                    # React entry point
+  index.css                   # Tailwind imports
+  /types
+    index.ts                  # All frontend types: User, Favorite, hooks, API
+  /context
+    UserContext.tsx           # Auth state: { user, setUser, ready }
+  /hooks
+    useFavorites.ts           # Favorites CRUD with optimistic updates
+    useSearchHistory.ts       # History with pagination and sorting
+    useMapData.ts             # Combined map markers fetch
+    useDebounce.ts            # Debounce hook (500ms default)
+  /pages
+    Login.tsx                 # Login form with Zod validation
+    Register.tsx              # Registration form
+    Weather.tsx               # Search + weather display + favorite toggle
+    History.tsx               # Paginated history table
+    Favorites.tsx             # Favorites grid with live weather
+    Map.tsx                   # Interactive Leaflet map
+  /components
+    Header.tsx                # Navigation + avatar + logout
+    Avatar.tsx                # Deterministic color avatar from username
+    SettingsDialog.tsx        # Profile/password settings modal (tabbed)
+    ProtectedRoute.tsx        # Auth guard with loading state
+    /ui                       # shadcn components (includes Dialog)
+    /map                      # Map components (WeatherMap, MarkerPopup, MapControls, MapLegend)
+  /lib
+    utils.ts                  # cn() for Tailwind class merging
+    weather.ts                # WMO weather codes to descriptions/icons
+    validations.ts            # Zod schemas for forms (login, register, profile, password)
 ```
 
+## API Endpoints
+
+### Auth Routes (`/api/v1/auth`)
+Rate limited: 100 requests per 15 minutes
+
+| Method | Endpoint | Body | Description |
+|--------|----------|------|-------------|
+| POST | `/register` | `{username, email, password}` | Create new user |
+| POST | `/login` | `{email, password}` | Login, returns JWT cookie |
+| POST | `/logout` | - | Clear JWT cookie |
+| GET | `/profile` | - | Get current user from token |
+| PATCH | `/profile` | `{username}` | Update username (auth required) |
+| PATCH | `/password` | `{currentPassword, newPassword}` | Change password (auth required) |
+
+### Protected Routes (require authentication)
+
+**History (`/api/v1/history`)**
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Get paginated history (`?page=1&limit=20&sortBy=createdAt&sortOrder=desc`) |
+| POST | `/` | Save new search |
+| DELETE | `/:id` | Delete history entry |
+
+**Favorites (`/api/v1/favorites`)**
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Get all favorites |
+| POST | `/` | Add favorite (max 10) |
+| DELETE | `/:id` | Remove favorite |
+
+**Other**
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/statistics` | Aggregated weather stats |
+| GET | `/api/v1/map/data` | Combined favorites + history markers |
+| GET | `/api/v1/health` | Health check |
+
+## Getting Started
+
+### Prerequisites
+- Node.js 18+
+- MongoDB Atlas account or local MongoDB
+- npm or yarn
+
+### Server Setup
+
+1. Navigate to server directory:
+```bash
+cd server
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Create `.env` file:
+```env
+MONGODB_URL=mongodb+srv://...
+CORS_ORIGIN_URL=http://localhost:5173
+JWT_SECRET=your-secret-key
+PORT=4000
+```
+
+4. Start the server:
+```bash
+npm run dev
+# or for production
+npm run build && npm run start
+```
+
+### Client Setup
+
+1. Navigate to client directory:
 ```bash
 cd client
 ```
 
+2. Install dependencies:
 ```bash
-yarn install
+npm install
 ```
 
-2. Install Tailwind CSS (https://tailwindcss.com/docs/guides/vite):
+3. Create `.env` file:
+```env
+VITE_API_URL=http://localhost:4000
+```
 
+4. Start the development server:
 ```bash
-npm install -D tailwindcss postcss autoprefixer
+npm run dev
 ```
 
+5. Open http://localhost:5173
+
+## Database Schema
+
+### User
+```typescript
+interface IUser {
+  username: string;       // 2-50 chars
+  email: string;          // unique, lowercase
+  password: string;       // hashed, min 6 chars
+  favorites: IFavorite[]; // max 10 items
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface IFavorite {
+  cityName: string;
+  country: string;
+  lat: number;
+  lon: number;
+  addedAt: Date;
+}
+```
+
+### SearchHistory
+```typescript
+interface ISearchHistory {
+  userId: ObjectId;       // ref to User
+  cityName: string;
+  country: string;
+  lat: number;
+  lon: number;
+  temperature: number;
+  feelsLike: number;
+  humidity: number;
+  windSpeed: number;
+  weatherCondition: string;
+  weatherIcon: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+## Security
+
+- JWT tokens stored in httpOnly cookies (XSS protection)
+- Passwords hashed with bcrypt (10 salt rounds)
+- Helmet middleware for security headers
+- Rate limiting on auth routes (100 req/15 min)
+- CORS restricted to frontend origin
+- Request body size limited to 10kb
+
+## CI/CD
+
+GitHub Actions workflows run on push/PR to `client/` or `server/` directories:
+
+| Workflow | Triggers | Steps |
+|----------|----------|-------|
+| Client CI | `client/**` changes | Install → Lint → Format check → Build |
+| Server CI | `server/**` changes | Install → Lint → Format check → Build |
+
+Both use Node.js 20 on `ubuntu-latest`.
+
+## Custom Hooks
+
+### useFavorites
+```typescript
+const {
+  favorites,           // Favorite[]
+  loading,             // boolean
+  error,               // string | null
+  favoritesCount,      // number
+  canAddMore,          // boolean (< 10)
+  addFavorite,         // (cityData: FavoriteInput) => Promise<void>
+  removeFavorite,      // (id: string) => Promise<void>
+  isFavorited,         // (lat: number, lon: number) => boolean
+  getFavoriteId,       // (lat: number, lon: number) => string | undefined
+}: UseFavoritesReturn = useFavorites();
+```
+
+### useSearchHistory
+```typescript
+const {
+  history,             // SearchHistory[]
+  loading,             // boolean
+  error,               // string | null
+  pagination,          // Pagination { page, limit, total, pages }
+  fetchHistory,        // (page?, sortBy?, sortOrder?) => Promise<void>
+  saveSearch,          // (data: SearchHistoryInput) => Promise<SearchHistory>
+  deleteHistory,       // (id: string) => Promise<void>
+}: UseSearchHistoryReturn = useSearchHistory();
+```
+
+### useMapData
+```typescript
+const {
+  markers,             // MapMarker[]
+  counts,              // MapCounts { favorites, history }
+  loading,             // boolean
+  error,               // string | null
+  refetch,             // (isInitial?: boolean) => Promise<void>
+}: UseMapDataReturn = useMapData({ includeHistory: true, historyLimit: 50 });
+```
+
+## Build
+
+### Client Production Build
 ```bash
-npx tailwindcss init -p
+cd client
+npm run build
 ```
 
-- Go to tailwind.config.js and add:
-
+### Server Production Build
 ```bash
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
+cd server
+npm run build
+npm run start
 ```
-
-- Go to index.css and add:
-
-```bash
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-```
-
-3. Install Axios:
-
-```bash
-npm i axios
-```
-
-4. Install react-router DOM:
-
-```bash
-npm i react-router-dom
-```
-
-5. Install react icons for common icons:
-
-```bash
-npm i react-icons
-```
-
-6. Install Lodash utility library:
-
-```bash
-npm i lodash
-```
-
-7. Install react hot toast for interface notification:
-
-```bash
-yarn add react-hot-toast
-```
-
-### Backend Dependency
-
-1. Install ExpressJS:
-
-```bash
-npm i express
-```
-
-2. Install dotenv for env configuration:
-
-```bash
-npm i dotenv
-```
-
-3. Install CORS on the server to connect two different hosts:
-
-```bash
-npm i cors
-```
-
-4. Install mongoose to connect to MongoDB:
-
-```bash
-npm i mongoose
-```
-
-5. Install nodeman to monitor the changes made on the server:
-
-```bash
-yarn global add nodemon
-```
-
-```bash
-nodemon index.js
-```
-
-6. Install bcrypt to encrypt the password (hashed password) and compare passwords during login:
-
-```bash
-npm i bcrypt
-```
-
-7. Install jsonwebtoken for JSON web token (JWT):
-
-- Implement cookies to a specific user and track them throughout the application:
-
-```bash
-npm i jsonwebtoken
-```
-
-- Initialize cookie parser allowing the cookies to go back from one host to another:
-
-```bash
-npm i cookie-parser
-```
-
-## Project Directory
-
-```
-client
-├── src
-│   ├── context/
-│   ├── components/
-│   ├── pages/
-│   ├── App.jsx
-│   └── main.jsx
-├── index.html
-├── .env
-└── configuration(s)
-```
-
----
-
-```
-server
-├── controllers
-│   └── authController.js
-├── models
-│   └── User.js
-├── routes
-│   └── authRoutes.js
-├── index.js
-├── .env
-└── configuration(s)
-```
-
-## Functionality
-
-### Use JWT to Protect APIs
-
-1. Assign the current user a JSON web token only when ___logged in___:
-
-> - If the passwords match, we sign the token with the user email, name, id, and a pre-defined JWT secret.
-
-> - Set the signed token to cookies and send them back to the frontend.
-
-2. Share cookies throughout the application:
-
-> - Access cookies throughout the whole application using _useContext_ in React. We can have user information on any page the users go to if they are logged in.
-
-3. Authentication control:
-
-> - Require the client to have the token in the header of each request.
-
-> - If there is a token in the cookie, we first verify the token with a JWT secret. Then we can obtain user information.
-
-> - If there is no token in the cookie, we redirect users to the login page.
-
-4. Jump to the login page if not already logged in:
-
-> - We check user information from the context. If user information is null, then we navigate users to the login page.
-
-> - However, since we use _useEffect_ to fetch the user information from the backend, which is an asynchronous function and takes about 20 milliseconds, the website will always be redirected to the login page due to this delay.
-
-> - To overcome this delay and keep users on the current page if they are already logged in, we need to define another state "ready" in the context and set "ready" to true after we set user information. Then on each page, if "ready" is true and user information is null, then we can redirect the users to the login page.
-
-5. Logout:
-
-> - Reset cookies to an empty string.
-
-> - Navigate back to the login page.
-
-### Frontend Password Toggling for Better User Experience
-
-## Demo
-
-### Sign Up Page (with password toggling)
-
-![Sign Up Page](./img/signup.png)
-
-<!-- ### Login Page
-
-![Login Page](./img/login.png) -->
-
-### React Toast Notification
-
-> (1) Login user not found:
-
-![Login User Not Found](./img/login_user_not_found.png)
-
-> (2) Sign up user is missing:
-
-![Login User Not Found](./img/sign_up_user_is_missing.png)
-
-> (3) Log out successful:
-
-![Log Out Successful](./img/logout_successful.png)
-
-### Search for Cities
-
-![Main Page](./img/search_city.png)
-
-### Check the Weather
-
-![Weather](./img/weather.png)
-
-## Resources
-
-- Icons: https://heroicons.com/
-
-- OpenWeather: https://openweathermap.org/api
-
-## References
-
-- https://www.youtube.com/watch?v=XPC81RWOItI
-
-- https://www.youtube.com/watch?v=tfrxfnUEM7U
-
-- https://www.youtube.com/watch?v=MpQbwtSiZ7E
-
-- https://www.youtube.com/watch?v=J4WSmVX6Lhg
-
-## Notes
-
-This repository is for learning purposes only.
