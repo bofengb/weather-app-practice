@@ -4,6 +4,7 @@ interface MongooseError extends Error {
   name: string;
 }
 
+// Middleware
 const errorHandler = (
   err: MongooseError,
   _req: Request,

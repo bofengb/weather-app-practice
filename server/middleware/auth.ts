@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import type { JWTPayload } from '../types/index.js';
 
+// Middleware
 const auth = (req: Request, res: Response, next: NextFunction): void => {
   const { token } = req.cookies;
 
