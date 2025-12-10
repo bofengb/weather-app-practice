@@ -1,11 +1,15 @@
 {
   "name": "weather-app-server",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "dist/index.js",
   "engines": {
-    "node": "18.x"
+    "node": ">=18.x"
   },
   "scripts": {
+    "dev": "tsx watch index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
@@ -21,6 +25,14 @@
     "mongoose": "^8.3.3"
   },
   "devDependencies": {
-    "prettier": "^3.4.2"
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.10.2",
+    "prettier": "^3.4.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }
