@@ -12,6 +12,9 @@ import mapRoutes from './routes/mapRoutes.js';
 
 const app = express();
 
+// trust vercel's proxy for rate limiting
+app.set('trust proxy', 1);
+
 // Middleware order matters
 // helmet first for security headers (CSP, X-Frame-Options, etc.)
 app.use(helmet());
