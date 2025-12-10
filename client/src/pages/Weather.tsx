@@ -185,7 +185,7 @@ export default function Weather() {
       <Header />
 
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto">
+        <div className="w-full sm:max-w-md sm:mx-auto">
           {showSearch ? (
             <div className="space-y-4 pt-12">
               <h1 className="text-2xl font-bold text-center mb-8">

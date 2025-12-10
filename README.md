@@ -1,6 +1,6 @@
 # Weather App
 
-A full-stack weather application built with the MERN stack (MongoDB, Express, React, Node.js). Users can search for weather conditions worldwide, save favorites, view search history, and visualize locations on an interactive map.
+A full-stack weather application built with the MERN stack (MongoDB, Express, React, Node.js) using **TypeScript**. Users can search for weather conditions worldwide, save favorites, view search history, and visualize locations on an interactive map.
 
 ## Features
 
@@ -13,6 +13,7 @@ A full-stack weather application built with the MERN stack (MongoDB, Express, Re
 ## Tech Stack
 
 ### Frontend
+- TypeScript with strict mode
 - React 18 with Vite
 - React Router 6 for navigation
 - Tailwind CSS for styling
@@ -24,7 +25,8 @@ A full-stack weather application built with the MERN stack (MongoDB, Express, Re
 - Lucide React for icons
 
 ### Backend
-- Express.js
+- TypeScript with strict mode (ES2020 target)
+- Express.js with tsx (dev runner)
 - MongoDB with Mongoose ODM
 - JWT for authentication
 - bcrypt for password hashing
@@ -44,49 +46,54 @@ A full-stack weather application built with the MERN stack (MongoDB, Express, Re
 
 ```
 /server
-  index.js                    # Express app setup, middleware, routes
+  index.ts                    # Express app setup, middleware, routes
+  /types
+    index.ts                  # Shared types: IUser, ISearchHistory, API types
+    express.d.ts              # Express Request augmentation for req.user
   /middleware
-    auth.js                   # JWT verification middleware
-    errorHandler.js           # Centralized error handling
+    auth.ts                   # JWT verification middleware
+    errorHandler.ts           # Centralized error handling
   /controllers
-    authController.js         # register, login, logout, profile
-    weatherController.js      # history CRUD, favorites CRUD, statistics
-    mapController.js          # combined map data endpoint
+    authController.ts         # register, login, logout, profile
+    weatherController.ts      # history CRUD, favorites CRUD, statistics
+    mapController.ts          # combined map data endpoint
   /models
-    User.js                   # User schema with embedded favorites
-    SearchHistory.js          # Search history schema
+    User.ts                   # User schema with embedded favorites
+    SearchHistory.ts          # Search history schema
   /routes
-    authRoutes.js             # /api/v1/auth/*
-    weatherRoutes.js          # /api/v1/history, /api/v1/favorites, /api/v1/statistics
-    mapRoutes.js              # /api/v1/map/data
+    authRoutes.ts             # /api/v1/auth/*
+    weatherRoutes.ts          # /api/v1/history, /api/v1/favorites, /api/v1/statistics
+    mapRoutes.ts              # /api/v1/map/data
 
 /client/src
-  App.jsx                     # Routes, axios config, context provider
-  main.jsx                    # React entry point
+  App.tsx                     # Routes, axios config, context provider
+  main.tsx                    # React entry point
   index.css                   # Tailwind imports
+  /types
+    index.ts                  # All frontend types: User, Favorite, hooks, API
   /context
-    UserContext.jsx           # Auth state: { user, setUser, ready }
+    UserContext.tsx           # Auth state: { user, setUser, ready }
   /hooks
-    useFavorites.jsx          # Favorites CRUD with optimistic updates
-    useSearchHistory.jsx      # History with pagination and sorting
-    useMapData.jsx            # Combined map markers fetch
-    useDebounce.jsx           # Debounce hook (500ms default)
+    useFavorites.ts           # Favorites CRUD with optimistic updates
+    useSearchHistory.ts       # History with pagination and sorting
+    useMapData.ts             # Combined map markers fetch
+    useDebounce.ts            # Debounce hook (500ms default)
   /pages
-    Login.jsx                 # Login form with Zod validation
-    Register.jsx              # Registration form
-    Weather.jsx               # Search + weather display + favorite toggle
-    History.jsx               # Paginated history table
-    Favorites.jsx             # Favorites grid with live weather
-    Map.jsx                   # Interactive Leaflet map
+    Login.tsx                 # Login form with Zod validation
+    Register.tsx              # Registration form
+    Weather.tsx               # Search + weather display + favorite toggle
+    History.tsx               # Paginated history table
+    Favorites.tsx             # Favorites grid with live weather
+    Map.tsx                   # Interactive Leaflet map
   /components
-    Header.jsx                # Navigation + user info + logout
-    ProtectedRoute.jsx        # Auth guard with loading state
+    Header.tsx                # Navigation + user info + logout
+    ProtectedRoute.tsx        # Auth guard with loading state
     /ui                       # shadcn components
     /map                      # Map components (WeatherMap, MarkerPopup, MapControls, MapLegend)
   /lib
-    utils.js                  # cn() for Tailwind class merging
-    weather.js                # WMO weather codes to descriptions/icons
-    validations.js            # Zod schemas for forms
+    utils.ts                  # cn() for Tailwind class merging
+    weather.ts                # WMO weather codes to descriptions/icons
+    validations.ts            # Zod schemas for forms
 ```
 
 ## API Endpoints
@@ -153,9 +160,9 @@ PORT=4000
 
 4. Start the server:
 ```bash
-node index.js
-# or with hot reload
-npx nodemon index.js
+npm run dev
+# or for production
+npm run build && npm run start
 ```
 
 ### Client Setup
@@ -185,39 +192,41 @@ npm run dev
 ## Database Schema
 
 ### User
-```javascript
-{
-  username: String,       // 2-50 chars
-  email: String,          // unique, lowercase
-  password: String,       // hashed, min 6 chars
-  favorites: [{           // max 10 items
-    cityName: String,
-    country: String,
-    lat: Number,
-    lon: Number,
-    addedAt: Date
-  }],
-  createdAt: Date,
-  updatedAt: Date
+```typescript
+interface IUser {
+  username: string;       // 2-50 chars
+  email: string;          // unique, lowercase
+  password: string;       // hashed, min 6 chars
+  favorites: IFavorite[]; // max 10 items
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface IFavorite {
+  cityName: string;
+  country: string;
+  lat: number;
+  lon: number;
+  addedAt: Date;
 }
 ```
 
 ### SearchHistory
-```javascript
-{
-  userId: ObjectId,       // ref to User
-  cityName: String,
-  country: String,
-  lat: Number,
-  lon: Number,
-  temperature: Number,
-  feelsLike: Number,
-  humidity: Number,
-  windSpeed: Number,
-  weatherCondition: String,
-  weatherIcon: String,
-  createdAt: Date,
-  updatedAt: Date
+```typescript
+interface ISearchHistory {
+  userId: ObjectId;       // ref to User
+  cityName: string;
+  country: string;
+  lat: number;
+  lon: number;
+  temperature: number;
+  feelsLike: number;
+  humidity: number;
+  windSpeed: number;
+  weatherCondition: string;
+  weatherIcon: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 ```
 
@@ -233,42 +242,42 @@ npm run dev
 ## Custom Hooks
 
 ### useFavorites
-```javascript
+```typescript
 const {
-  favorites,           // Array of favorite cities
-  loading,             // Boolean
-  error,               // Error message or null
-  favoritesCount,      // Number
-  canAddMore,          // Boolean (< 10)
-  addFavorite,         // async (cityData) => void
-  removeFavorite,      // async (id) => void
-  isFavorited,         // (lat, lon) => boolean
-  getFavoriteId,       // (lat, lon) => string | undefined
-} = useFavorites();
+  favorites,           // Favorite[]
+  loading,             // boolean
+  error,               // string | null
+  favoritesCount,      // number
+  canAddMore,          // boolean (< 10)
+  addFavorite,         // (cityData: FavoriteInput) => Promise<void>
+  removeFavorite,      // (id: string) => Promise<void>
+  isFavorited,         // (lat: number, lon: number) => boolean
+  getFavoriteId,       // (lat: number, lon: number) => string | undefined
+}: UseFavoritesReturn = useFavorites();
 ```
 
 ### useSearchHistory
-```javascript
+```typescript
 const {
-  history,             // Array of search entries
-  loading,             // Boolean
-  error,               // Error message or null
-  pagination,          // { page, limit, total, pages }
-  fetchHistory,        // async (page, sortBy, sortOrder) => void
-  saveSearch,          // async (searchData) => void
-  deleteHistory,       // async (id) => void
-} = useSearchHistory();
+  history,             // SearchHistory[]
+  loading,             // boolean
+  error,               // string | null
+  pagination,          // Pagination { page, limit, total, pages }
+  fetchHistory,        // (page?, sortBy?, sortOrder?) => Promise<void>
+  saveSearch,          // (data: SearchHistoryInput) => Promise<SearchHistory>
+  deleteHistory,       // (id: string) => Promise<void>
+}: UseSearchHistoryReturn = useSearchHistory();
 ```
 
 ### useMapData
-```javascript
+```typescript
 const {
-  markers,             // Array of map markers
-  counts,              // { favorites, history }
-  loading,             // Boolean
-  error,               // Error message or null
-  refetch,             // async () => void
-} = useMapData({ includeHistory: true, historyLimit: 50 });
+  markers,             // MapMarker[]
+  counts,              // MapCounts { favorites, history }
+  loading,             // boolean
+  error,               // string | null
+  refetch,             // (isInitial?: boolean) => Promise<void>
+}: UseMapDataReturn = useMapData({ includeHistory: true, historyLimit: 50 });
 ```
 
 ## Build
@@ -279,9 +288,9 @@ cd client
 npm run build
 ```
 
-### Server Deployment
-The server exports the Express app for Vercel serverless deployment. See `server/vercel.json` for configuration.
-
-## License
-
-This repository is for learning purposes only.
+### Server Production Build
+```bash
+cd server
+npm run build
+npm run start
+```

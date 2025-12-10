@@ -130,13 +130,13 @@ export default function History() {
                           Temp <SortIcon field="temperature" />
                         </div>
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">
+                      <th className="px-4 py-3 text-left text-sm font-medium hidden sm:table-cell">
                         Humidity
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">
+                      <th className="px-4 py-3 text-left text-sm font-medium hidden md:table-cell">
                         Wind
                       </th>
-                      <th className="px-4 py-3 text-left text-sm font-medium">
+                      <th className="px-4 py-3 text-left text-sm font-medium hidden lg:table-cell">
                         Condition
                       </th>
                       <th className="px-4 py-3 text-right text-sm font-medium">
@@ -161,13 +161,13 @@ export default function History() {
                         >
                           {item.temperature?.toFixed(1)}°C
                         </td>
-                        <td className="px-4 py-3 text-sm text-muted-foreground">
+                        <td className="px-4 py-3 text-sm text-muted-foreground hidden sm:table-cell">
                           {item.humidity}%
                         </td>
-                        <td className="px-4 py-3 text-sm text-muted-foreground">
+                        <td className="px-4 py-3 text-sm text-muted-foreground hidden md:table-cell">
                           {item.windSpeed?.toFixed(1)} km/h
                         </td>
-                        <td className="px-4 py-3 text-sm text-muted-foreground">
+                        <td className="px-4 py-3 text-sm text-muted-foreground hidden lg:table-cell">
                           {item.weatherCondition}
                         </td>
                         <td className="px-4 py-3 text-right">
