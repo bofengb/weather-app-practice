@@ -10,8 +10,9 @@ import History from '@/pages/History';
 import Favorites from '@/pages/Favorites';
 import Map from '@/pages/Map';
 
-// in dev, proxy to local server. in prod, use relative URLs (proxied by vercel.json)
-axios.defaults.baseURL = import.meta.env.DEV ? 'http://localhost:4000' : '';
+// in dev, use local server. in prod, use VITE_API_URL
+axios.defaults.baseURL =
+  import.meta.env.VITE_API_URL || 'http://localhost:4000';
 axios.defaults.withCredentials = true;
 
 function App() {
