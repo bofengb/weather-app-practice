@@ -26,7 +26,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 const cookieOptions = {
   httpOnly: true, // JS can't access (XSS protection)
   secure: isProduction, // HTTPS only in prod
-  sameSite: 'lax' as const, // CSRF protection, works with same-origin proxy
+  sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax', // 'none' for cross-origin in prod
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
