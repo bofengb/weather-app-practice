@@ -130,13 +130,20 @@ export default function Favorites() {
           </Card>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+              data-testid="favorites-grid"
+            >
               {favorites.map((fav) => {
                 const weather = weatherData[fav._id];
                 const isLoading = loadingWeather && !weather;
 
                 return (
-                  <Card key={fav._id} className="relative overflow-hidden">
+                  <Card
+                    key={fav._id}
+                    className="relative overflow-hidden"
+                    data-testid={`favorite-card-${fav.cityName}`}
+                  >
                     <div className="absolute top-2 right-2 flex gap-1">
                       <Button
                         variant="ghost"

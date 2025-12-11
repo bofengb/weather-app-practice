@@ -197,6 +197,7 @@ export default function Weather() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="text-lg h-12"
+                data-testid="weather-search"
               />
 
               {geoData && geoData.length > 0 && (
@@ -214,6 +215,7 @@ export default function Weather() {
                           )
                         }
                         className="w-full text-left px-4 py-3 hover:bg-accent rounded-md transition-colors"
+                        data-testid={`city-suggestion-${index}`}
                       >
                         <span className="font-medium">{city.name}</span>
                         <span className="text-muted-foreground ml-2">
@@ -253,6 +255,7 @@ export default function Weather() {
                 <button
                   onClick={handleFavoriteToggle}
                   className="text-2xl hover:scale-110 transition-transform"
+                  data-testid="favorite-toggle"
                   title={
                     currentLocation &&
                     isFavorited(currentLocation.lat, currentLocation.lon)

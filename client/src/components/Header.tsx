@@ -65,6 +65,7 @@ export default function Header() {
               <Link
                 key={path}
                 to={path}
+                data-testid={`nav-${label.toLowerCase()}`}
                 className={`flex items-center gap-1.5 rounded-lg px-2 sm:px-4 py-2 text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-primary/10 text-primary'
