@@ -17,7 +17,8 @@ export default function Map() {
 
   // dedupe: hide history markers that are already favorited
   const dedupedMarkers = useMemo(
-    () => markers.filter((m) => m.type !== 'history' || !isFavorited(m.lat, m.lon)),
+    () =>
+      markers.filter((m) => m.type !== 'history' || !isFavorited(m.lat, m.lon)),
     [markers, isFavorited]
   );
 
