@@ -246,16 +246,43 @@ interface ISearchHistory {
 - CORS restricted to frontend origin
 - Request body size limited to 10kb
 
+## Testing
+
+### E2E Tests (Playwright)
+
+End-to-end tests are located in `client/e2e/` and run against a real browser using Playwright.
+
+```bash
+# Run E2E tests locally
+cd client
+npm run test:e2e
+
+# Run with interactive UI
+npm run test:e2e:ui
+```
+
+**Configuration** (`client/playwright.config.ts`):
+- Test directory: `./e2e`
+- Browser: Chromium only
+- Base URL: `http://localhost:5173`
+- Retries: 2 in CI, 0 locally
+- Auto-starts dev server if not running
+
+**Test files**:
+- `auth.spec.ts` - Authentication flows (login, register)
+- `favorites.spec.ts` - Favorites functionality
+
 ## CI/CD
 
-GitHub Actions workflows run on push/PR to `client/` or `server/` directories:
+GitHub Actions workflows run on push/PR:
 
 | Workflow | Triggers | Steps |
 |----------|----------|-------|
 | Client CI | `client/**` changes | Install → Lint → Format check → Build |
 | Server CI | `server/**` changes | Install → Lint → Format check → Build |
+| E2E Tests | All push/PR | Start MongoDB → Start server → Run Playwright tests |
 
-Both use Node.js 20 on `ubuntu-latest`.
+All workflows use Node.js 20 on `ubuntu-latest`. E2E workflow spins up MongoDB 7 as a service and uploads test reports as artifacts.
 
 ## Custom Hooks
 
