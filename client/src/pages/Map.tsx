@@ -15,6 +15,12 @@ export default function Map() {
   const { markers, counts, loading, refetch } = useMapData();
   const { addFavorite, isFavorited, canAddMore } = useFavorites();
 
+  // dedupe: hide history markers that are already favorited
+  const dedupedMarkers = useMemo(
+    () => markers.filter((m) => m.type !== 'history' || !isFavorited(m.lat, m.lon)),
+    [markers, isFavorited]
+  );
+
   // Lift state up
   const [filters, setFilters] = useState<MapFilters>({
     showFavorites: true,
@@ -93,7 +99,7 @@ export default function Map() {
       {/* relative parent + absolute children = controls float over map */}
       <div className="h-[calc(100vh-4rem)] relative">
         <WeatherMap
-          markers={markers}
+          markers={dedupedMarkers}
           center={initialCenter}
           zoom={initialZoom}
           filters={filters}
