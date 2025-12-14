@@ -16,6 +16,7 @@ export default function Map() {
   const { addFavorite, isFavorited, canAddMore } = useFavorites();
 
   // dedupe: hide history markers that are already favorited
+  // One location can only have one pin
   const dedupedMarkers = useMemo(
     () =>
       markers.filter((m) => m.type !== 'history' || !isFavorited(m.lat, m.lon)),

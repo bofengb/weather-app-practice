@@ -124,6 +124,11 @@ export default function Login() {
               Sign up
             </Link>
           </div>
+          <div className="mt-4 rounded-md bg-muted p-3 text-center text-sm">
+            <p className="font-medium">Demo Credentials</p>
+            <p className="text-muted-foreground">Email: demo@example.com</p>
+            <p className="text-muted-foreground">Password: demo123456</p>
+          </div>
         </CardContent>
       </Card>
     </div>
