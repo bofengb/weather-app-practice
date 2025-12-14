@@ -99,7 +99,7 @@ export const deleteSearchHistory = async (
   try {
     const { id } = req.params;
 
-    // User isolation: req.user.id from verified JWT ensures user owns this data
+    // Ownership check: req.user.id from verified JWT ensures user owns this data
     const deleted = await SearchHistory.findOneAndDelete({
       _id: id,
       userId: req.user!.id,
